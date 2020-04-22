@@ -46,9 +46,10 @@ set mouse=a
 " The right way to escape
 inoremap jk <Esc>
 
-" Remapping for moving panes in the j-k-h-l directions
+" Remapping for moving panes in the j-k-h-l directions 
+"   (I used <C-m> for <C-W>k because <C-k> is used for comments)
 map <C-j> <C-W>j
-map <C-k> <C-W>k
+map <C-m> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
 
