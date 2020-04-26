@@ -56,6 +56,7 @@ map <C-l> <C-W>l
 set hlsearch
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 set incsearch 
+hi Search ctermbg=yellow ctermfg=black
 
 " Set up clipboard copy and paste
 vnoremap <C-c> :w !pbcopy<CR><CR>
