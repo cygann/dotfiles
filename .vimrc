@@ -63,6 +63,9 @@ vnoremap <C-c> :w !pbcopy<CR><CR>
 vnoremap <C-v> :r !pbpaste<CR><CR>
 set ttymouse=xterm2
 
+" Tags
+set tags=./tags;
+
 " Toggle comments 
 let s:comment_map = { 
     \   "c": '\/\/',
