@@ -16,6 +16,7 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-speeddating'
 Plugin 'mitchpaulus/autocorrect.vim'
+Plugin 'christoomey/vim-tmux-navigator'
 
 call vundle#end()
 
