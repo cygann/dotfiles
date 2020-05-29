@@ -47,17 +47,12 @@ set mouse=a
 " The right way to escape
 inoremap jk <Esc>
 
-" Remapping for moving panes in the j-k-h-l directions 
-map <C-j> <C-W>j
-map <C-k> <C-W>k
-map <C-h> <C-W>h
-map <C-l> <C-W>l
-
 " Press Space to turn off highlighting and clear any displayed message 
 set hlsearch
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 set incsearch 
-hi Search ctermbg=yellow ctermfg=black
+hi Search ctermbg=3 ctermfg=black
+hi Search guibg=Yellow guifg=Black ctermbg=Yellow ctermfg=Black
 
 " Set up clipboard copy and paste
 vnoremap <C-c> :w !pbcopy<CR><CR>
@@ -66,6 +61,10 @@ set ttymouse=xterm2
 
 " Tags
 set tags=./tags;
+
+" Color Aesthetics
+highlight LineNr ctermfg=11
+highlight Visual cterm=NONE ctermbg=8 ctermfg=NONE guibg=Grey90
 
 " Toggle comments 
 let s:comment_map = { 
