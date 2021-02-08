@@ -1,3 +1,7 @@
+""" vimrc
+""" Author: Natalie Cygan 
+""" Last updated Jul 10 2020
+
 set nocompatible
 filetype off
 
@@ -15,10 +19,17 @@ Plugin 'vim-scripts/argtextobj.vim'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-speeddating'
+Plugin 'tpope/vim-sensible'
 Plugin 'mitchpaulus/autocorrect.vim'
 Plugin 'christoomey/vim-tmux-navigator'
 
 call vundle#end()
+
+set termguicolors
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+set background=dark
 
 filetype indent plugin on
 au! BufRead,BufNewFile *.pen setfiletype pen
@@ -28,6 +39,9 @@ syntax enable
 " set backup
 nnoremap Z :w<cr>
 set ruler
+
+" Line numbers
+set relativenumber
 
 " Tab Settings
 set expandtab
@@ -51,8 +65,8 @@ inoremap jk <Esc>
 set hlsearch
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 set incsearch 
-hi Search ctermbg=3 ctermfg=black
-hi Search guibg=Yellow guifg=Black ctermbg=Yellow ctermfg=Black
+" hi Search ctermbg=3 ctermfg=black
+" hi Search guibg=Yellow guifg=Black ctermbg=Yellow ctermfg=Black
 
 " Set up clipboard copy and paste
 vnoremap <C-c> :w !pbcopy<CR><CR>
@@ -63,8 +77,8 @@ set ttymouse=xterm2
 set tags=./tags;
 
 " Color Aesthetics
-highlight LineNr ctermfg=11
-highlight Visual cterm=NONE ctermbg=8 ctermfg=NONE guibg=Grey90
+" highlight LineNr ctermfg=11
+" highlight Visual cterm=NONE ctermbg=8 ctermfg=NONE guibg=Grey90
 
 " Toggle comments 
 let s:comment_map = { 
