@@ -61,6 +61,10 @@ set mouse=a
 " The right way to escape
 inoremap jk <Esc>
 
+" leader key and commands
+let mapleader = "\<Space>"
+nnoremap <leader>d opdb.set_trace()<Esc>
+
 " Press Space to turn off highlighting and clear any displayed message 
 set hlsearch
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
