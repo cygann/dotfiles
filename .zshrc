@@ -1,12 +1,19 @@
 PATH="/Applications/CMake.app/Contents/bin":"$PATH"
 export PATH="/Users/nataliecygan/miniforge3/bin:$PATH"
 export PATH=$PATH:~/.platformio/penv/bin
+export PATH=$PATH:~/bin
 
 alias pen="python /Users/nataliecygan/Desktop/projects/pen/pen.py"
 alias sz="du -cksh *"
 alias tmux="TERM=screen-256color-bce tmux"
 alias zshrc="nvim ~/.zshrc"
 alias nvimconf="nvim ~/.config/nvim/init.vim"
+
+alias rtt='JLinkRTTClient'
+
+# zshrc edit & modify
+alias zshrc!="nvim ~/.zshrc && source ~/.zshrc"
+alias downloads="cd ~/Downloads/"
 
 ## --------------------------------------------- ##
 # If you come from bash you might have to change your $PATH.
@@ -22,7 +29,6 @@ export ZSH="/Users/nataliecygan/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
 export TYPEWRITTEN_CURSOR='terminal'
 export TYPEWRITTEN_SYMBOL='🔆 natalie >'
-#export PS1
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -86,7 +92,7 @@ export TYPEWRITTEN_SYMBOL='🔆 natalie >'
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
+# source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -115,6 +121,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # Set typewritten ZSH as a prompt
+fpath+=$HOME/.zsh/typewritten
 autoload -U promptinit; promptinit
 prompt typewritten
 
@@ -133,3 +140,6 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+# fpath=($fpath "/Users/nataliec/.zfunctions")
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

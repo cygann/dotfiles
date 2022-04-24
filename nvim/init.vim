@@ -145,8 +145,12 @@ call plug#begin()
   " TMUX navigation
   Plug 'alexghergh/nvim-tmux-navigation'
 
-  " Color picker
+  " Color picker // TODO look into
   Plug 'KabbAmine/vCoolor.vim'
+
+  Plug 'APZelos/blamer.nvim'
+
+  """ Don't forget to run :PlugInstall
 
 " Initialize the plugin system
 call plug#end()
@@ -172,7 +176,6 @@ require'nvim-treesitter.configs'.setup {
 --[[ LSP ]]
 
 local lspconfig = require'lspconfig'
-
 
 --- ccls for C/C++
 lspconfig.ccls.setup{}
@@ -287,9 +290,9 @@ EOF
 "   Can see keybindings with `:Telescope keymaps`
 
 "" Map escape to terminal exit keys.
-" tnoremap <Leader><Esc> <C-\><C-n>
-" tnoremap <Leader><Leader> <C-\><C-n>:q<CR>
 inoremap jk <Esc>
+
+" Floatterm toggle: option + '\'
 let g:floaterm_keymap_toggle = '«'
 
 " Use ctrl-[hjkl] to navigate between panes
@@ -298,26 +301,16 @@ nmap <silent> <c-j> :wincmd j<CR>
 nmap <silent> <c-h> :wincmd h<CR>
 nmap <silent> <c-l> :wincmd l<CR>
 
-" Lsp keybindings, many pulled from
-" https://github.com/jose-elias-alvarez/nvim-lsp-ts-utils/issues/50
-nmap <silent> gd <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> gv :vs<CR><cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> gs :sp<CR><cmd>lua vim.lsp.buf.definition()<CR>
-" nnoremap <silent> gnt :sp<CR><cmd>lua vim.lsp.buf.definition()<CR><C-W>T
-nnoremap <silent> gD <cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <silent> gr <cmd>lua vim.lsp.buf.references()<CR>
-nnoremap <silent> gi <cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap <silent> K <cmd>lua vim.lsp.buf.hover()<CR>
-nnoremap <silent> <A-n> <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
-nnoremap <silent> <A-m> <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
-nnoremap <silent> <A-r> <cmd>lua vim.lsp.buf.rename()<CR>
+" Blamer config
+let g:blamer_enabled = 1
+let g:blamer_show_in_insert_modes = 1
+let g:blamer_prefix = ' >>> '
+let g:blamer_delay = 500
+let g:blamer_relative_time = 1
 
 "" Run Telescope with ,,
 nnoremap <Leader><Leader> :Telescope<CR>
 
-"" I prefer to use FZF for finding files. Can always access this through
-"" Telescope
-" nnoremap <Leader>f :Telescope find_files<CR>
 "" Run FZF with ,f
 nnoremap <Leader>f :FZF<CR>
 
@@ -408,3 +401,5 @@ nnoremap <silent> <C-Space> :lua require'nvim-tmux-navigation'.NvimTmuxNavigateN
 " Sounds
 " let g:keysound_theme = 'typewriter'
 " let g:keysound_enable = 1
+
+let @+ = expand("%:p")
