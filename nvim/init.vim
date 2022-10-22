@@ -1,8 +1,21 @@
+"""
+
+"      __                _
+"   /\ \ \___  _____   _(_)_ __ ___
+"  /  \/ / _ \/ _ \ \ / / | '_ ` _ \
+" / /\  /  __/ (_) \ V /| | | | | | |
+" \_\ \/ \___|\___/ \_/ |_|_| |_| |_|
+
+"""
+
 filetype plugin indent on    " required
 syntax on
 
+" keyboard special
+command! -nargs=+ SurroundBuffer normal ciw<args><Esc>P
+nnoremap å :SurroundBuffer<Space>
+
 set termguicolors
-colorscheme melange
 
 set exrc secure " source local init.vim file if present
 
@@ -13,6 +26,8 @@ if &term =~ '^screen'
     " tmux knows the extended mouse mode
     set ttymouse=xterm2
 endif
+
+set rtp+=/usr/local/opt/fzf
 
 set backspace=indent,eol,start
 
@@ -66,6 +81,8 @@ call plug#begin()
   "   run `:help lsp` for more information
   Plug 'neovim/nvim-lspconfig'
 
+  Plug 'morhetz/gruvbox'
+
   Plug 'kabouzeid/nvim-lspinstall'
 
   " Neovim Completion Manager
@@ -118,17 +135,13 @@ call plug#begin()
   "   run `:help fugitive` for more information
   Plug 'tpope/vim-fugitive'
 
-  " NNN (NNN file picker)
-  "   run `:help nnn` for more information
-  Plug 'mcchrish/nnn.vim'
-
   " FZF
   "   run `:help fzf` for more information
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
 
   " Markdown
-  Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'}
+  " Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'}
 
   " Vim Merge Request
   Plug 'google/vim-maktaba'
@@ -145,12 +158,19 @@ call plug#begin()
   " TMUX navigation
   Plug 'alexghergh/nvim-tmux-navigation'
 
-  " Color picker // TODO look into
+  " Color picker
   Plug 'KabbAmine/vCoolor.vim'
 
-  Plug 'APZelos/blamer.nvim'
+  " Telescope zoxide
+  Plug 'nvim-lua/popup.nvim'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'jvgrootveld/telescope-zoxide'
 
-  """ Don't forget to run :PlugInstall
+  " status bar
+  Plug 'nvim-lualine/lualine.nvim'
+  " If you want to have icons in your statusline choose one of these
+  " Plug 'kyazdani42/nvim-web-devicons'
 
 " Initialize the plugin system
 call plug#end()
@@ -176,6 +196,7 @@ require'nvim-treesitter.configs'.setup {
 --[[ LSP ]]
 
 local lspconfig = require'lspconfig'
+
 
 --- ccls for C/C++
 lspconfig.ccls.setup{}
@@ -257,16 +278,6 @@ vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
 vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
 vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
 
-local nnn_actions = {};
-nnn_actions['<C-T>'] = 'tab drop';
-nnn_actions['<C-X>'] = 'split';
-nnn_actions['<C-V>'] = 'vsplit';
-require('nnn').setup{
-  action = nnn_actions,
-  session = 'global',
-  layout = { window = { width = 0.9, height = 0.6, highlight = 'Debug' } }
-}
-
 -- PyDocstring
 --vim.g.pydocstring_formatter = "google"
 --vim.g.pydocstring_templates_path = "~/.config/nvim/resources/pydoc"
@@ -290,10 +301,10 @@ EOF
 "   Can see keybindings with `:Telescope keymaps`
 
 "" Map escape to terminal exit keys.
+" tnoremap <Leader><Esc> <C-\><C-n>
+" tnoremap <Leader><Leader> <C-\><C-n>:q<CR>
 inoremap jk <Esc>
-
-" Floatterm toggle: option + '\'
-let g:floaterm_keymap_toggle = '«'
+let g:floaterm_keymap_toggle = '÷'
 
 " Use ctrl-[hjkl] to navigate between panes
 nmap <silent> <c-k> :wincmd k<CR>
@@ -301,16 +312,26 @@ nmap <silent> <c-j> :wincmd j<CR>
 nmap <silent> <c-h> :wincmd h<CR>
 nmap <silent> <c-l> :wincmd l<CR>
 
-" Blamer config
-let g:blamer_enabled = 1
-let g:blamer_show_in_insert_modes = 1
-let g:blamer_prefix = ' >>> '
-let g:blamer_delay = 500
-let g:blamer_relative_time = 1
+" Lsp keybindings, many pulled from
+" https://github.com/jose-elias-alvarez/nvim-lsp-ts-utils/issues/50
+nmap <silent> gd <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> gv :vs<CR><cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> gs :sp<CR><cmd>lua vim.lsp.buf.definition()<CR>
+" nnoremap <silent> gnt :sp<CR><cmd>lua vim.lsp.buf.definition()<CR><C-W>T
+nnoremap <silent> gD <cmd>lua vim.lsp.buf.declaration()<CR>
+nnoremap <silent> gr <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent> gi <cmd>lua vim.lsp.buf.implementation()<CR>
+nnoremap <silent> K <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <silent> <A-n> <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
+nnoremap <silent> <A-m> <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
+nnoremap <silent> <A-r> <cmd>lua vim.lsp.buf.rename()<CR>
 
 "" Run Telescope with ,,
 nnoremap <Leader><Leader> :Telescope<CR>
 
+"" I prefer to use FZF for finding files. Can always access this through
+"" Telescope
+" nnoremap <Leader>f :Telescope find_files<CR>
 "" Run FZF with ,f
 nnoremap <Leader>f :FZF<CR>
 
@@ -326,11 +347,10 @@ nnoremap <Leader>r :Telescope lsp_references<CR>
 "" Run Telescope TreeSitter with ,s
 nnoremap <Leader>s :Telescope treesitter<CR>
 
-"" Run NnnPicker with ,n
-nnoremap <Leader>n :NnnPicker<CR>
+nnoremap <Leader>z :Telescope zoxide<CR>
 
-"" Toggle NerdTree with ,t
-" nnoremap <Leader>t :NERDTreeToggle<CR>
+"" Toggle NerdTree with n
+nnoremap <Leader>n :NERDTreeToggle<CR>
 
 "" Toggle Tagbar with ,b
 nnoremap <Leader>b :TagbarToggle<CR>
@@ -398,8 +418,69 @@ nnoremap <silent> <C-l> :lua require'nvim-tmux-navigation'.NvimTmuxNavigateRight
 nnoremap <silent> <C-\> :lua require'nvim-tmux-navigation'.NvimTmuxNavigateLastActive()<cr>
 nnoremap <silent> <C-Space> :lua require'nvim-tmux-navigation'.NvimTmuxNavigateNext()<cr>
 
-" Sounds
-" let g:keysound_theme = 'typewriter'
-" let g:keysound_enable = 1
+colorscheme gruvbox
 
-let @+ = expand("%:p")
+lua << END
+
+local colors = {
+  blue     = '#549699',
+  cyan     = '#94b3a8',
+  black    = '#353535',
+  white    = '#b7a996',
+  red      = '#ED8796',
+  violet   = '#D183E8',
+  grey     = '#303030',
+  camel    = "#DFA82A",
+  sage     = "#A8A521",
+  green    = "#9dd08e",
+}
+
+local bubbles_theme = {
+  normal = {
+    a = { fg = colors.black, bg = colors.camel },
+    b = { fg = colors.black, bg = colors.sage },
+    c = { fg = colors.black, bg = nil},
+  },
+
+  insert = { a = { fg = colors.black, bg = colors.blue } },
+  visual = { a = { fg = colors.black, bg = colors.cyan } },
+  replace = { a = { fg = colors.black, bg = colors.red } },
+  command = { a = { fg = colors.black, bg = colors.green } },
+
+  inactive = {
+    a = { fg = colors.white, bg = colors.black },
+    b = { fg = colors.white, bg = colors.black },
+    c = { fg = colors.black, bg = colors.black },
+  },
+}
+
+require('lualine').setup {
+  options = {
+    theme = bubbles_theme,
+    component_separators = '|',
+    section_separators = { left = '', right = '' },
+  },
+  sections = {
+    lualine_a = {
+      { 'mode', separator = { left = '' }, right_padding = 2},
+    },
+    lualine_b = { 'filename', 'branch' },
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = { 'filesize', 'progress' },
+    lualine_z = {
+      { 'location', separator = { right = '' }, left_padding = 2 },
+    },
+  },
+  inactive_sections = {
+    lualine_a = { 'filename' },
+    lualine_b = {},
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = {},
+    lualine_z = { 'location' },
+  },
+  tabline = {},
+  extensions = {},
+}
+END

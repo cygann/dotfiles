@@ -2,18 +2,36 @@ PATH="/Applications/CMake.app/Contents/bin":"$PATH"
 export PATH="/Users/nataliecygan/miniforge3/bin:$PATH"
 export PATH=$PATH:~/.platformio/penv/bin
 export PATH=$PATH:~/bin
+export EDITOR="nvim"
 
 alias pen="python /Users/nataliecygan/Desktop/projects/pen/pen.py"
 alias sz="du -cksh *"
 alias tmux="TERM=screen-256color-bce tmux"
-alias zshrc="nvim ~/.zshrc"
 alias nvimconf="nvim ~/.config/nvim/init.vim"
 
+# ====== zshrc edit & modify ===========
+alias zshrc="nvim ~/.zshrc"
+alias zshrc!="nvim ~/.zshrc && source ~/.zshrc"
+alias tmuxconf="nvim ~/.tmux.conf"
+
+# ====== Directory jumps ==========
+alias downloads="cd ~/Downloads/"
+
+# Jlink
 alias rtt='JLinkRTTClient'
 
-# zshrc edit & modify
-alias zshrc!="nvim ~/.zshrc && source ~/.zshrc"
-alias downloads="cd ~/Downloads/"
+# Umbelt
+alias umbelt-jlink="Jlinkexe -autoconnect 1 -Device NRF52840_XXAA -If SWD -Speed 400"
+alias umbelt="cd ~/Desktop/umbelt/umbelt-sw"
+alias piow="watch -n 0.5 pio device list"
+
+# qmk flash
+alias qmk-river="qmk flash -kb phase -km river"
+
+## --------------------------------------------- ##
+
+# Extra / for fun
+alias gruvbox="pastel color d73925 a8a521 dfa82a 549699 bf7897 79aa7d b7a996"
 
 ## --------------------------------------------- ##
 # If you come from bash you might have to change your $PATH.
@@ -28,7 +46,7 @@ export ZSH="/Users/nataliecygan/.oh-my-zsh"
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="robbyrussell"
 export TYPEWRITTEN_CURSOR='terminal'
-export TYPEWRITTEN_SYMBOL='🔆 natalie >'
+export TYPEWRITTEN_SYMBOL='🪲  natalie >'
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -92,7 +110,7 @@ export TYPEWRITTEN_SYMBOL='🔆 natalie >'
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-# source $ZSH/oh-my-zsh.sh
+source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -121,7 +139,6 @@ plugins=(git)
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # Set typewritten ZSH as a prompt
-fpath+=$HOME/.zsh/typewritten
 autoload -U promptinit; promptinit
 prompt typewritten
 
@@ -140,6 +157,13 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-# fpath=($fpath "/Users/nataliec/.zfunctions")
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# direnv: hook into zsh
+# https://direnv.net
+eval "$(direnv hook zsh)"
+
+# zoxide: smarter cd
+# https://github.com/ajeetdsouza/zoxide
+eval "$(zoxide init zsh)"
+
