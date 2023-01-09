@@ -162,6 +162,9 @@ call plug#begin()
   " Color picker
   Plug 'KabbAmine/vCoolor.vim'
 
+  " Blamer layer
+  Plug 'APZelos/blamer.nvim'
+
   " Telescope zoxide
   Plug 'nvim-lua/popup.nvim'
   Plug 'nvim-lua/plenary.nvim'
@@ -172,6 +175,9 @@ call plug#begin()
   Plug 'nvim-lualine/lualine.nvim'
   " If you want to have icons in your statusline choose one of these
   " Plug 'kyazdani42/nvim-web-devicons'
+
+  " Clang format
+  Plug 'rhysd/vim-clang-format'
 
   " Exlixir support
   Plug 'elixir-editors/vim-elixir'
@@ -331,13 +337,20 @@ EOF
 " tnoremap <Leader><Esc> <C-\><C-n>
 " tnoremap <Leader><Leader> <C-\><C-n>:q<CR>
 inoremap jk <Esc>
-let g:floaterm_keymap_toggle = '÷'
+let g:floaterm_keymap_toggle = '«'
 
 " Use ctrl-[hjkl] to navigate between panes
 nmap <silent> <c-k> :wincmd k<CR>
 nmap <silent> <c-j> :wincmd j<CR>
 nmap <silent> <c-h> :wincmd h<CR>
 nmap <silent> <c-l> :wincmd l<CR>
+
+" Blamer settings
+let g:blamer_enabled = 1
+let g:blamer_show_in_insert_modes = 1
+let g:blamer_prefix = ' >>> '
+let g:blamer_delay = 1000
+let g:blamer_relative_time = 1
 
 " Lsp keybindings, many pulled from
 " https://github.com/jose-elias-alvarez/nvim-lsp-ts-utils/issues/50
@@ -414,6 +427,7 @@ let s:comment_map = {
     \   "tcl": '#',
     \   "zsh": '#',
     \   "tmux": '#',
+    \   "yaml": '#',
     \ }
 function! ToggleComment()
     if has_key(s:comment_map, &filetype)
