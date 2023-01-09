@@ -1,11 +1,12 @@
 """
-
+" Natalie's
 "      __                _
 "   /\ \ \___  _____   _(_)_ __ ___
 "  /  \/ / _ \/ _ \ \ / / | '_ ` _ \
 " / /\  /  __/ (_) \ V /| | | | | | |
 " \_\ \/ \___|\___/ \_/ |_|_| |_| |_|
-
+"
+" config.
 """
 
 filetype plugin indent on    " required
@@ -172,6 +173,9 @@ call plug#begin()
   " If you want to have icons in your statusline choose one of these
   " Plug 'kyazdani42/nvim-web-devicons'
 
+  " Exlixir support
+  Plug 'elixir-editors/vim-elixir'
+
 " Initialize the plugin system
 call plug#end()
 
@@ -212,6 +216,29 @@ lspconfig.bashls.setup{
 
 --- pylsp for Python
 --- lspconfig.pylsp.setup{}
+
+-- rust-analyzer for Rust
+lspconfig.rust_analyzer.setup({
+    on_attach=on_attach,
+    settings = {
+        ["rust-analyzer"] = {
+            imports = {
+                granularity = {
+                    group = "module",
+                },
+                prefix = "self",
+            },
+            cargo = {
+                buildScripts = {
+                    enable = true,
+                },
+            },
+            procMacro = {
+                enable = true
+            },
+        }
+    }
+})
 
 
 vim.o.completeopt = "menuone,noselect"
@@ -464,7 +491,7 @@ require('lualine').setup {
     lualine_a = {
       { 'mode', separator = { left = '' }, right_padding = 2},
     },
-    lualine_b = { 'filename', 'branch' },
+    lualine_b = { { 'filename', file_status = true, path = 1 } },
     lualine_c = {},
     lualine_x = {},
     lualine_y = { 'filesize', 'progress' },
@@ -484,3 +511,8 @@ require('lualine').setup {
   extensions = {},
 }
 END
+
+" TODO:
+" https://stackoverflow.com/questions/8584182/how-to-refresh-in-nerdtree-plugin
+
+
