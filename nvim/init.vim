@@ -23,10 +23,6 @@ set exrc secure " source local init.vim file if present
 set number " line numbers
 
 set mouse=a " enable mouse
-if &term =~ '^screen'
-    " tmux knows the extended mouse mode
-    set ttymouse=xterm2
-endif
 
 set rtp+=/usr/local/opt/fzf
 
@@ -111,9 +107,14 @@ call plug#begin()
   Plug 'nvim-treesitter/nvim-treesitter-refactor'
   Plug 'nvim-treesitter/playground'
 
-  " nvim-compe
+  " nvim-cmp
   "   run `:help compe` for more information
-  Plug 'hrsh7th/nvim-compe'
+  Plug 'neovim/nvim-lspconfig'
+  Plug 'hrsh7th/cmp-nvim-lsp'
+  Plug 'hrsh7th/cmp-buffer'
+  Plug 'hrsh7th/cmp-path'
+  Plug 'hrsh7th/cmp-cmdline'
+  Plug 'hrsh7th/nvim-cmp'
 
   " Telescope
   "   run `:help telescope` for more information
@@ -135,6 +136,8 @@ call plug#begin()
   " Fugitive (git wrapper for vim)
   "   run `:help fugitive` for more information
   Plug 'tpope/vim-fugitive'
+  " For :GBrowse
+  Plug 'tpope/vim-rhubarb'
 
   " FZF
   "   run `:help fzf` for more information
@@ -173,8 +176,7 @@ call plug#begin()
 
   " status bar
   Plug 'nvim-lualine/lualine.nvim'
-  " If you want to have icons in your statusline choose one of these
-  " Plug 'kyazdani42/nvim-web-devicons'
+  Plug 'nvim-tree/nvim-web-devicons'
 
   " Clang format
   Plug 'rhysd/vim-clang-format'
@@ -182,12 +184,122 @@ call plug#begin()
   " Exlixir support
   Plug 'elixir-editors/vim-elixir'
 
+  " Jupyter integration
+  Plug 'luk400/vim-jukit'
+
+  " Markdown preview
+  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
+
+  " Commenting
+  Plug 'numToStr/Comment.nvim'
+
+  " Color highlighting for fun & for joy
+  Plug 'norcalli/nvim-colorizer.lua'
+
 " Initialize the plugin system
 call plug#end()
 
 lua <<EOF
+-- Set up nvim-cmp.
+local cmp = require'cmp'
+
+require'colorizer'.setup()
+
+cmp.setup({
+  snippet = {
+    -- REQUIRED - you must specify a snippet engine
+    expand = function(args)
+      vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+      -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+      -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+      -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+      -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+
+      -- For `mini.snippets` users:
+      -- local insert = MiniSnippets.config.expand.insert or MiniSnippets.default_insert
+      -- insert({ body = args.body }) -- Insert at cursor
+      -- cmp.resubscribe({ "TextChangedI", "TextChangedP" })
+      -- require("cmp.config").set_onetime({ sources = {} })
+    end,
+  },
+  window = {
+    -- completion = cmp.config.window.bordered(),
+    -- documentation = cmp.config.window.bordered(),
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip and luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip and luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+  }),
+
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'vsnip' }, -- For vsnip users.
+    -- { name = 'luasnip' }, -- For luasnip users.
+    -- { name = 'ultisnips' }, -- For ultisnips users.
+    -- { name = 'snippy' }, -- For snippy users.
+  }, {
+    { name = 'buffer' },
+  })
+})
+
+-- To use git you need to install the plugin petertriho/cmp-git and uncomment lines below
+-- Set configuration for specific filetype.
+--[[ cmp.setup.filetype('gitcommit', {
+  sources = cmp.config.sources({
+    { name = 'git' },
+  }, {
+    { name = 'buffer' },
+  })
+)
+equire("cmp_git").setup() ]]--
+
+-- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline({ '/', '?' }, {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = 'buffer' }
+  }
+})
+
+-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline(':', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({
+    { name = 'path' }
+  }, {
+    { name = 'cmdline' }
+  }),
+  matching = { disallow_symbol_nonprefix_matching = false }
+})
+
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+
 require'nvim-treesitter.configs'.setup {
   ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = { "rust" },
   -- ignore_install = { "javascript" }, -- List of parsers to ignore installing
   highlight = {
     enable = false,              -- false will disable the whole extension
@@ -203,28 +315,39 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 
+require('Comment').setup()
+
 --[[ LSP ]]
 
 local lspconfig = require'lspconfig'
 
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 --- ccls for C/C++
-lspconfig.ccls.setup{}
+lspconfig.ccls.setup{
+  capabilities = capabilities,
+}
 vim.diagnostic.config({virtual_text = false})
 vim.diagnostic.config({signs = false})
+-- vim.diagnostic.config({virtual_text = true})
+-- vim.diagnostic.config({signs = true})
 
 --- bashls for Bash scripts
 lspconfig.bashls.setup{
+  capabilities = capabilities,
   cmd_env = {
     GLOB_PATTERN = "**/*@(.sh|.inc|.bash|.command)"
   }
 }
 
 --- pylsp for Python
---- lspconfig.pylsp.setup{}
+lspconfig.pylsp.setup{
+  capabilities = capabilities,
+}
 
 -- rust-analyzer for Rust
 lspconfig.rust_analyzer.setup({
+    capabilities = capabilities,
     on_attach=on_attach,
     settings = {
         ["rust-analyzer"] = {
@@ -249,29 +372,6 @@ lspconfig.rust_analyzer.setup({
 
 vim.o.completeopt = "menuone,noselect"
 
-require'compe'.setup {
-  enabled = true;
-  autocomplete = true;
-  debug = false;
-  min_length = 1;
-  preselect = 'enable';
-  throttle_time = 80;
-  source_timeout = 200;
-  incomplete_delay = 400;
-  max_abbr_width = 100;
-  max_kind_width = 100;
-  max_menu_width = 100;
-  documentation = true;
-
-  source = {
-    path = true;
-    buffer = true;
-    calc = true;
-    nvim_lsp = true;
-    nvim_lua = true;
-  };
-}
-
 local t = function(str)
   return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
@@ -285,35 +385,12 @@ local check_back_space = function()
     end
 end
 
--- Use (s-)tab to:
---- move to prev/next item in completion menuone
---- jump to prev/next snippet's placeholder
-_G.tab_complete = function()
-  if vim.fn.pumvisible() == 1 then
-    return t "<C-n>"
-  elseif check_back_space() then
-    return t "<Tab>"
-  else
-    return vim.fn['compe#complete']()
-  end
-end
-_G.s_tab_complete = function()
-  if vim.fn.pumvisible() == 1 then
-    return t "<C-p>"
-  else
-    -- If <S-Tab> is not working in your terminal, change it to <C-h>
-    return t "<S-Tab>"
-  end
-end
-
-vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
-
 -- PyDocstring
 --vim.g.pydocstring_formatter = "google"
 --vim.g.pydocstring_templates_path = "~/.config/nvim/resources/pydoc"
+
+-- Vim jukit
+vim.g.jukit_mappings = 0
 
 -- Instant Markdown
 -- Uncomment to override defaults:
@@ -362,6 +439,7 @@ nnoremap <silent> gD <cmd>lua vim.lsp.buf.declaration()<CR>
 nnoremap <silent> gr <cmd>lua vim.lsp.buf.references()<CR>
 nnoremap <silent> gi <cmd>lua vim.lsp.buf.implementation()<CR>
 nnoremap <silent> K <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <silent> <leader>w <cmd>lua vim.diagnostic.open_float()<CR>
 nnoremap <silent> <A-n> <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
 nnoremap <silent> <A-m> <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
 nnoremap <silent> <A-r> <cmd>lua vim.lsp.buf.rename()<CR>
@@ -372,84 +450,36 @@ nnoremap <Leader><Leader> :Telescope<CR>
 "" I prefer to use FZF for finding files. Can always access this through
 "" Telescope
 " nnoremap <Leader>f :Telescope find_files<CR>
-"" Run FZF with ,f
+"" Run FZF with <space> f
 nnoremap <Leader>f :FZF<CR>
 
-"" Run Telescope live grep with ,g
+"" Run Telescope live grep with <space> g
 nnoremap <Leader>g :Telescope live_grep<CR>
 
-"" Run Telescope LSP definitions with ,d
+"" Run Telescope LSP definitions with <space> d
 nnoremap <Leader>d :Telescope lsp_definitions<CR>
 
-"" Run Telescope LSP references with ,r
+"" Run Telescope LSP references with<space> r
 nnoremap <Leader>r :Telescope lsp_references<CR>
 
-"" Run Telescope TreeSitter with ,s
+"" Run Telescope TreeSitter with <space> s
 nnoremap <Leader>s :Telescope treesitter<CR>
 
 nnoremap <Leader>z :Telescope zoxide<CR>
 
-"" Toggle NerdTree with n
+"" Toggle NerdTree with <space> n
 nnoremap <Leader>n :NERDTreeToggle<CR>
 
-"" Toggle Tagbar with ,b
+"" Toggle Tagbar with <space> b
 nnoremap <Leader>b :TagbarToggle<CR>
 
-" Comment toggling! Credit to user427390 at https://stackoverflow.com/a/24046914.
-let s:comment_map = {
-    \   "c": '\/\/',
-    \   "cpp": '\/\/',
-    \   "go": '\/\/',
-    \   "java": '\/\/',
-    \   "javascript": '\/\/',
-    \   "lua": '--',
-    \   "scala": '\/\/',
-    \   "php": '\/\/',
-    \   "python": '#',
-    \   "ruby": '#',
-    \   "rust": '\/\/',
-    \   "sh": '#',
-    \   "desktop": '#',
-    \   "fstab": '#',
-    \   "conf": '#',
-    \   "profile": '#',
-    \   "bashrc": '#',
-    \   "bash_profile": '#',
-    \   "mail": '>',
-    \   "eml": '>',
-    \   "bat": 'REM',
-    \   "ahk": ';',
-    \   "vim": '"',
-    \   "tex": '%',
-    \   "matlab": '%',
-    \   "gdb": '#',
-    \   "verilog": '\/\/',
-    \   "tcl": '#',
-    \   "zsh": '#',
-    \   "tmux": '#',
-    \   "yaml": '#',
-    \ }
-function! ToggleComment()
-    if has_key(s:comment_map, &filetype)
-        let comment_leader = s:comment_map[&filetype]
-        if getline('.') =~ "^\\s*" . comment_leader . " "
-            " Uncomment the line
-            execute "silent s/^\\(\\s*\\)" . comment_leader . " /\\1/"
-        else
-            if getline('.') =~ "^\\s*" . comment_leader
-                " Uncomment the line
-                execute "silent s/^\\(\\s*\\)" . comment_leader . "/\\1/"
-            else
-                " Comment the line
-                execute "silent s/^\\(\\s*\\)/\\1" . comment_leader . " /"
-            end
-        end
-    else
-        echo "No comment leader found for filetype"
-    end
-endfunction
-nnoremap <C-m> :call ToggleComment()<cr>
-vnoremap <C-m> :call ToggleComment()<cr>
+""" Copy current file path to clipboard
+nnoremap <Leader>p :let @+=expand('%')<CR>
+""" Abs path
+nnoremap <Leader>pa :let @+=expand('%:p') <CR>
+
+""" Open current document in markdown preview with <space> m
+nnoremap <Leader>m :MarkdownPreview<CR>
 
 " nvim-tmux navigation
 nnoremap <silent> <C-h> :lua require'nvim-tmux-navigation'.NvimTmuxNavigateLeft()<cr>
@@ -499,18 +529,18 @@ require('lualine').setup {
   options = {
     theme = bubbles_theme,
     component_separators = '|',
-    section_separators = { left = '', right = '' },
+    section_separators = { left = '', right = '' },
   },
   sections = {
     lualine_a = {
-      { 'mode', separator = { left = '' }, right_padding = 2},
+      { 'mode', separator = { left = '' }, right_padding = 2},
     },
     lualine_b = { { 'filename', file_status = true, path = 1 } },
     lualine_c = {},
-    lualine_x = {},
-    lualine_y = { 'filesize', 'progress' },
+    lualine_x = {{ 'branch', icon = '∆' }, 'diff'},
+    lualine_y = { 'filesize', 'progress'},
     lualine_z = {
-      { 'location', separator = { right = '' }, left_padding = 2 },
+      { 'location', separator = { right = '' }, left_padding = 2 },
     },
   },
   inactive_sections = {
